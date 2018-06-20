@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+    change-tracking-ingestion
+
+    SAM Template for OpsCommon Change Tracking Ingestion System
+Globals:
+    Function:
+        Timeout: 10
+
+Resources:
+
+    ChangeTrackingIngestionFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+          CodeUri: .
+          Handler: index.handler
+          Runtime: nodejs8.10
+          Policies:
+            - DynamoDBCrudPolicy:
+                TableName: !Ref ChangeTrackingDynamoDBTable
+          Events:
+              ChangeTrackingIngestion:
+                  Type: Api
+                  Properties:
+                      Path: /
+                      Method: post
+    ChangeTrackingDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions: 
+          - 
+            AttributeName: "brand"
+            AttributeType: "S"
+          - 
+            AttributeName: "endTime"
+            AttributeType: "N"
+        KeySchema: 
+          - 
+            AttributeName: "brand"
+            KeyType: "HASH"
+          - 
+            AttributeName: "endTime"
+            KeyType: "RANGE"
+        ProvisionedThroughput: 
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+        TableName: "change-tracking"
+
+Outputs:
+
+    ChangeTrackingIngestionApi:
+      Description: "API Gateway endpoint URL for Prod stage for Change Tracking Ingestion function"
+      Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+
+    ChangeTrackingIngestionFunction:
+      Description: "Change Tracking Ingestion Lambda Function ARN"
+      Value: !GetAtt ChangeTrackingIngestionFunction.Arn
+
+    ChangeTrackingIngestionFunctionIamRole:
+      Description: "Implicit IAM Role created for Change Tracking Ingestion function"
+      Value: !GetAtt ChangeTrackingIngestionFunctionRole.Arn
