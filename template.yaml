@@ -3,7 +3,7 @@ Transform: AWS::Serverless-2016-10-31
 Description: >
     change-tracking-ingestion
 
-    SAM Template for OpsCommon Change Tracking Ingestion System
+    AWS SAM Template for OpsCommon Change Tracking Ingestion System
 Globals:
     Function:
         Timeout: 10
@@ -33,19 +33,34 @@ Resources:
             AttributeName: "brand"
             AttributeType: "S"
           - 
-            AttributeName: "endTime"
-            AttributeType: "N"
+            AttributeName: "identifier"
+            AttributeType: "S"
         KeySchema: 
           - 
             AttributeName: "brand"
             KeyType: "HASH"
           - 
-            AttributeName: "endTime"
+            AttributeName: "identifier"
             KeyType: "RANGE"
         ProvisionedThroughput: 
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
         TableName: "change-tracking"
+        GlobalSecondaryIndexes: 
+        - 
+          IndexName: "identifier-brand"
+          KeySchema: 
+            - 
+              AttributeName: "identifier"
+              KeyType: "HASH"
+            - 
+              AttributeName: "brand"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+          ProvisionedThroughput: 
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
 
 Outputs:
 

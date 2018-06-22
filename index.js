@@ -7,10 +7,12 @@ const docClient = new AWS.DynamoDB.DocumentClient({
 
 exports.handler = (event, context, callback) => {
     console.log('Received event:', JSON.stringify(event, null, 2));
+    let tableItem = JSON.parse(event.body);
+    tableItem.identifier = `${tableItem.endTime}:${tableItem.serviceName}:${tableItem.version}:${tableItem.environment}:${tableItem.region}`;
 
     const params = {
         TableName: 'change-tracking',
-        Item: JSON.parse(event.body),
+        Item: tableItem,
     };
 
     const done = (err, res) => callback(null, {
